@@ -38,4 +38,4 @@
 - iPhone / Watch 上安装应用成功，不等于必然有权修改 MobileGestalt，也不能保证某个 watchOS 版本兼容。
 - `Backup MG` 必须确保未曾用已修改的 MobileGestalt 覆盖原始备份；升级或重装时不要盲目重复备份。
 - 外部 Anisette 服务是第三方服务；不要将 Apple ID 密码、2FA 或签名私钥提交到 Issue、GitHub Secrets 或 CI 日志。
-- 目前构建和实际手表安装均需 GitHub Actions 与设备验证。
+- **构建验证已通过：** [GitHub Actions #43153944527](https://github.com/davidkane0526/iloader/actions/runs/43153944527)，已生成 12,387,840 字节的 Windows x64 EXE。\n\nSHA-256：`923c7fe46b792d9f6a427165c41d1767e842b83ce274d9efa220743c6db626b1`。\n\n**实机安装仍需在 Apple Watch 上验证。**
