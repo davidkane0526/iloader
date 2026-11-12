@@ -1,0 +1,57 @@
+name: Build HermesEnabler Windows CLI
+on:
+  push:
+    branches: [feat/hermes-win-watch-cli, main]
+    paths:
+      - 'cli/**'
+      - 'apply_patch.py'
+      - '.github/workflows/build-hermes-cli.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-x64:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - name: Checkout patch repository
+        uses: actions/checkout@v4
+      - name: Checkout pinned upstream iLoader fork
+        uses: actions/checkout@v4
+        with:
+          repository: AndreySemjonov/iloader
+          ref: 2d13485ef2d7107b2bc2ec6cdb5f54ce5729ef70
+          path: upstream
+          persist-credentials: false
+      - name: Verify baseline and apply patches
+        shell: pwsh
+        run: |
+          $sha = git -C upstream rev-parse HEAD
+          if ($sha -ne '2d13485ef2d7107b2bc2ec6cdb5f54ce5729ef70') { throw "Unexpected upstream commit: $sha" }
+          python apply_patch.py --root upstream
+          Copy-Item -Recurse cli upstream/cli
+          Copy-Item upstream/src-tauri/Cargo.lock upstream/cli/Cargo.lock
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: upstream/cli
+      - name: Compile CLI for Windows
+        shell: pwsh
+        run: cargo build --release --manifest-path upstream/cli/Cargo.toml
+      - name: Verify and hash EXE
+        shell: pwsh
+        run: |
+          $exe = 'upstream/cli/target/release/iloader-cli.exe'
+          if (!(Test-Path $exe)) { throw 'Expected iloader-cli.exe is missing' }
+          Get-Item $exe | Select-Object Name,Length
+          Get-FileHash -Algorithm SHA256 $exe
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: iloader-cli-windows-x64
+          path: upstream/cli/target/release/iloader-cli.exe
+          if-no-files-found: error

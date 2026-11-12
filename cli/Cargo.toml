@@ -1,0 +1,14 @@
+[package]
+name = "iloader-cli"
+version = "0.1.0"
+edition = "2024"
+description = "Windows command-line iPhone and Apple Watch companion installer"
+license = "MIT"
+
+[dependencies]
+isideload = { path = "../vendor/isideload/isideload" }
+idevice = { version = "0.1.65", default-features = false, features = ["usbmuxd", "pair"] }
+tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
+rustls = { version = "0.23.36", default-features = false, features = ["ring", "tls12", "std"] }
+rpassword = "7.4"
+rootcause = "0.12"
